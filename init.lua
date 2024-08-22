@@ -617,11 +617,17 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        cpp = { 'clang_format' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
+      },
+      formatters = {
+        clang_format = {
+          prepend_args = { '--style=Microsoft' },
+        },
       },
     },
   },
