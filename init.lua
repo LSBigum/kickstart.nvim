@@ -18,6 +18,9 @@ vim.opt.number = true
 --  Experiment for yourself to see if you like it!
 vim.opt.relativenumber = true
 
+-- Line numbers when viewing directories (:Explore)
+vim.g.netrw_bufsettings = 'noma nomod nu nowrap ro nobl'
+
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
 
