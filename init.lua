@@ -78,7 +78,7 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 30
+vim.opt.scrolloff = 10
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
@@ -89,6 +89,10 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+
+-- Scroll with cursor in-place
+vim.keymap.set('n', '<C-e>', '1<C-d>:set scroll=0<CR>', { desc = 'Scroll down while cursor stays in-place' })
+vim.keymap.set('n', '<C-y>', '1<C-u>:set scroll=0<CR>', { desc = 'Scroll up while cursor stays in-place' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
