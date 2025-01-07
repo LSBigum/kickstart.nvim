@@ -1,71 +1,127 @@
--- debug.lua
---
--- Shows how to use the DAP plugin to debug your code.
---
--- Primarily focused on configuring the debugger for Go, but can
--- be extended to other languages as well. That's why it's called
--- kickstart.nvim and not kitchen-sink.nvim ;)
-
 return {
-  -- NOTE: Yes, you can install new plugins here!
   'mfussenegger/nvim-dap',
-  -- NOTE: And you can specify dependencies as well
   dependencies = {
+    -- Runs preLaunchTask / postDebugTask if present
+    { 'stevearc/overseer.nvim', config = true },
     -- Creates a beautiful debugger UI
     'rcarriga/nvim-dap-ui',
-
     -- Required dependency for nvim-dap-ui
     'nvim-neotest/nvim-nio',
-
-    -- Installs the debug adapters for you
-    'williamboman/mason.nvim',
-    'jay-babu/mason-nvim-dap.nvim',
-
-    -- Add your own debuggers here
-    'leoluz/nvim-dap-go',
   },
-  keys = function(_, keys)
-    local dap = require 'dap'
-    local dapui = require 'dapui'
-    return {
-      -- Basic debugging keymaps, feel free to change to your liking!
-      { '<F5>', dap.continue, desc = 'Debug: Start/Continue' },
-      { '<F1>', dap.step_into, desc = 'Debug: Step Into' },
-      { '<F2>', dap.step_over, desc = 'Debug: Step Over' },
-      { '<F3>', dap.step_out, desc = 'Debug: Step Out' },
-      { '<leader>b', dap.toggle_breakpoint, desc = 'Debug: Toggle Breakpoint' },
-      {
-        '<leader>B',
-        function()
-          dap.set_breakpoint(vim.fn.input 'Breakpoint condition: ')
-        end,
-        desc = 'Debug: Set Breakpoint',
-      },
-      -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
-      { '<F7>', dapui.toggle, desc = 'Debug: See last session result.' },
-      unpack(keys),
-    }
-  end,
+  keys = {
+    {
+      '<leader>dB',
+      function()
+        require('dap').list_breakpoints()
+      end,
+      desc = 'DAP Breakpoints',
+    },
+    {
+      '<leader>da',
+      function()
+        local widgets = require 'dap.ui.widgets'
+        widgets.centered_float(widgets.scopes, { border = 'rounded' })
+      end,
+      desc = 'DAP Scopes',
+    },
+    {
+      '<leader>db',
+      function()
+        require('dap').toggle_breakpoint()
+      end,
+      desc = 'Debug: Toggle Breakpoint',
+    },
+    {
+      '<F1>',
+      function()
+        require('dap.ui.widgets').hover(nil, { border = 'rounded' })
+      end,
+      desc = 'DAP Hover',
+    },
+    { '<F2>', '<CMD>DapContinue<CR>', desc = 'DAP Continue' },
+    { '<F3>', '<CMD>DapStepOver<CR>', desc = 'Step Over' },
+    { '<F4>', '<CMD>DapStepInto<CR>', desc = 'Step Into' },
+    { '<F5>', '<CMD>DapStepOut<CR>', desc = 'Step Out' },
+    {
+      '<F6>',
+      function()
+        require('dap').run_to_cursor()
+      end,
+      desc = 'Run to Cursor',
+    },
+    { '<F7>', '<CMD>DapToggleBreakpoint<CR>', desc = 'Toggle Breakpoint' },
+    {
+      '<F10>',
+      function()
+        require('dap').run_last()
+      end,
+      desc = 'Run Last',
+    },
+    {
+      '<F11>',
+      function()
+        vim.ui.input({ prompt = 'Breakpoint condition: ' }, function(input)
+          require('dap').set_breakpoint(input)
+        end)
+      end,
+      desc = 'Conditional Breakpoint',
+    },
+    { '<F12>', '<CMD>DapTerminate<CR>', desc = 'DAP Terminate' },
+    {
+      '<A-r>',
+      function()
+        require('dap').repl.toggle(nil, 'tab split')
+      end,
+      desc = 'Toggle DAP REPL',
+    },
+    {
+      '<leader>dq',
+      function()
+        require('dapui').close()
+      end,
+      desc = 'Close debug interface',
+    },
+    {
+      '<leader>do',
+      function()
+        require('dapui').open()
+      end,
+      desc = 'Open debug interface',
+    },
+  },
   config = function()
     local dap = require 'dap'
     local dapui = require 'dapui'
 
-    require('mason-nvim-dap').setup {
-      -- Makes a best effort to setup the various debuggers with
-      -- reasonable debug configurations
-      automatic_installation = true,
+    -- Signs
+    for _, group in pairs {
+      'DapBreakpoint',
+      'DapBreakpointCondition',
+      'DapBreakpointRejected',
+      'DapLogPoint',
+    } do
+      vim.fn.sign_define(group, { text = '●', texthl = group })
+    end
 
-      -- You can provide additional configuration to the handlers,
-      -- see mason-nvim-dap README for more information
-      handlers = {},
+    -- Setup
 
-      -- You'll need to check that you have the required things installed
-      -- online, please don't ask me how to install them :)
-      ensure_installed = {
-        -- Update this to ensure that you have the debuggers for the langs you want
-        'delve',
-      },
-    }
+    -- Decides when and how to jump when stopping at a breakpoint
+    -- The order matters!
+    --
+    -- (1) If the line with the breakpoint is visible, don't jump at all
+    -- (2) If the buffer is opened in a tab, jump to it instead
+    -- (3) Else, create a new tab with the buffer
+    --
+    -- This avoid unnecessary jumps
+    dap.defaults.fallback.switchbuf = 'usevisible,usetab,newtab'
+
+    -- Set exception breakpoint
+    dap.defaults.fallback.exception_breakpoints = { 'Notice', 'Warning', 'Error', 'Exception' }
+
+    -- Adapters
+    -- C, C++, Rust
+    require 'custom.plugins.dap.codelldb'
+    require('dap.ext.vscode').load_launchjs()
 
     -- Dap UI setup
     -- For more information, see |:help nvim-dap-ui|
@@ -90,16 +146,7 @@ return {
     }
 
     dap.listeners.after.event_initialized['dapui_config'] = dapui.open
-    dap.listeners.before.event_terminated['dapui_config'] = dapui.close
-    dap.listeners.before.event_exited['dapui_config'] = dapui.close
-
-    -- Install golang specific config
-    require('dap-go').setup {
-      delve = {
-        -- On Windows delve must be run attached or it crashes.
-        -- See https://github.com/leoluz/nvim-dap-go/blob/main/README.md#configuring
-        detached = vim.fn.has 'win32' == 0,
-      },
-    }
+    -- dap.listeners.before.event_terminated['dapui_config'] = dapui.close
+    -- dap.listeners.before.event_exited['dapui_config'] = dapui.close
   end,
 }
