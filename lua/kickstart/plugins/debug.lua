@@ -39,10 +39,10 @@ return {
       end,
       desc = 'DAP Hover',
     },
-    { '<F2>', '<CMD>DapContinue<CR>', desc = 'DAP Continue' },
+    { '<F2>', '<CMD>DapStepInto<CR>', desc = 'Step Into' },
     { '<F3>', '<CMD>DapStepOver<CR>', desc = 'Step Over' },
-    { '<F4>', '<CMD>DapStepInto<CR>', desc = 'Step Into' },
-    { '<F5>', '<CMD>DapStepOut<CR>', desc = 'Step Out' },
+    { '<F4>', '<CMD>DapStepOut<CR>', desc = 'Step Out' },
+    { '<F5>', '<CMD>DapContinue<CR>', desc = 'DAP Continue' },
     {
       '<F6>',
       function()
