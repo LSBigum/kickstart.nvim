@@ -7,6 +7,7 @@ return {
     'rcarriga/nvim-dap-ui',
     -- Required dependency for nvim-dap-ui
     'nvim-neotest/nvim-nio',
+    'theHamsta/nvim-dap-virtual-text',
   },
   keys = {
     {
@@ -148,5 +149,7 @@ return {
     dap.listeners.after.event_initialized['dapui_config'] = dapui.open
     -- dap.listeners.before.event_terminated['dapui_config'] = dapui.close
     -- dap.listeners.before.event_exited['dapui_config'] = dapui.close
+
+    require('nvim-dap-virtual-text').setup()
   end,
 }
