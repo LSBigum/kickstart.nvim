@@ -52,20 +52,22 @@ return {
     },
     { '<F7>', '<CMD>DapToggleBreakpoint<CR>', desc = 'Toggle Breakpoint' },
     {
-      '<F10>',
+      '<F8>',
       function()
-        require('dap').run_last()
-      end,
-      desc = 'Run Last',
-    },
-    {
-      '<F11>',
-      function()
+        -- Use "/nat [...]" in the breakpoint condition to use native language expressions,
+        -- which for example allows dereferencing pointers in the conditional breakpoint (/nat vector.front())
         vim.ui.input({ prompt = 'Breakpoint condition: ' }, function(input)
           require('dap').set_breakpoint(input)
         end)
       end,
       desc = 'Conditional Breakpoint',
+    },
+    {
+      '<F9>',
+      function()
+        require('dap').run_last()
+      end,
+      desc = 'Run Last',
     },
     { '<F12>', '<CMD>DapTerminate<CR>', desc = 'DAP Terminate' },
     {
