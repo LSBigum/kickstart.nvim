@@ -1,56 +1,3 @@
--- local cwd = vim.fn.getcwd()
--- -- vim.notify(vim.inspect {
--- --   '/home/nordbo/nvim_docker.sh',
--- --   'hawk20_compiler',
--- --   cwd,
--- -- })
--- return {
---   -- cmd = { 'clangd', '--background-index' },
---   cmd = {
---     '/home/nordbo/nvim_docker.sh',
---     'hawk20_compiler',
---     -- cwd,
---     -- '--background-index',
---     -- '-j=8',
---     -- '--log=verbose',
---     -- '--query-driver=/usr/bin/**/clang-*,/bin/clang,/bin/clang++,/usr/bin/gcc,/usr/bin/g++',
---     -- '--all-scopes-completion',
---     -- '--completion-style=detailed',
---     -- '--header-insertion-decorators',
---     -- '--header-insertion=iwyu',
---     -- '--pch-storage=memory',
---   },
---   root_markers = { 'compile_commands.json', 'compile_flags.txt' },
---   filetypes = { 'c', 'cpp' },
--- }
--- ~/.config/nvim/lua/lsp/clangd.lua
-
--- local lspconfig = require 'lspconfig'
--- local util = require 'lspconfig.util'
---
--- lspconfig.clangd.setup {
---   -- cmd can be a function in 0.11+, so it's evaluated when the server actually starts:
---   cmd = function()
---     -- wrap clangd in your script, and pass the cwd at startup time
---     return {
---       '/home/nordbo/nvim_docker.sh',
---       'hawk20_compiler',
---       vim.fn.getcwd(),
---     }
---   end,
---
---   -- detect your project root:
---   root_dir = util.root_pattern('compile_commands.json', 'compile_flags.txt', '.git'),
---
---   -- only for C-family files:
---   filetypes = { 'c', 'cpp', 'objc', 'objcpp' },
---
---   -- any clangd-specific settings can still go here:
---   -- settings = { clangd = { ... } },
--- }
-
--- ~/.config/nvim/init.lua  (or lua/plugins/lsp.lua)
-
 -- 1) make sure you have nvim-lspconfig installed:
 --    Plug 'neovim/nvim-lspconfig'    (vim-plug)
 --    use { 'neovim/nvim-lspconfig' } -- packer
@@ -126,4 +73,11 @@ nvim_lsp.clangd.setup {
   settings = {
     -- e.g. clangd-extension settings or inlay hints
   },
+  on_attach = function(client, bufnr)
+    -- only map when the LSP client is clangd
+    if client.name == 'clangd' then
+      local opts = { noremap = true, silent = true, buffer = bufnr, desc = 'C++: Switch between source and header file' }
+      vim.keymap.set('n', '<leader>u', '<cmd>ClangdSwitchSourceHeader<CR>', opts)
+    end
+  end,
 }
