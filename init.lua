@@ -93,6 +93,8 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = false
 
+vim.lsp.set_log_level 'debug'
+
 -- [[ Setting options ]]
 require 'options'
 
@@ -104,6 +106,8 @@ require 'lazy-bootstrap'
 
 -- [[ Configure and install plugins ]]
 require 'lazy-plugins'
+
+require 'lsp.clangd'
 
 -- Set relative line number as orange (do this after loading theme)
 vim.api.nvim_set_hl(0, 'LineNrAbove', { fg = 'grey' })

@@ -43,4 +43,15 @@ vim.opt.inccommand = 'split' -- Preview substitutions live, as you type!
 vim.opt.cursorline = true
 vim.opt.scrolloff = 10
 
+vim.diagnostic.config {
+  -- Use the default configuration
+  virtual_lines = true,
+
+  -- Alternatively, customize specific options
+  -- virtual_lines = {
+  --  -- Only show virtual line diagnostics for the current cursor line
+  --  current_line = true,
+  -- },
+}
+
 -- vim: ts=2 sts=2 sw=2 et
