@@ -8,13 +8,22 @@ local util = require 'lspconfig.util'
 -- function to compute where compile_commands.json lives:
 local function get_compile_commands_dir()
   local cwd = vim.fn.getcwd()
-  -- if we're inside catkin_ws/src/hawk/<proj> …
-  local ws_root, proj = cwd:match '(.+)/catkin_ws_20/src/hawk/([^/]+)'
-  if ws_root and proj then
-    -- … then use ~/catkin_ws/build/<proj>
-    return string.format('%s/catkin_ws_20/build/%s', ws_root, proj)
+
+  -- 1) hawk-namespaced packages
+  --    /…/catkin_ws/src/hawk/<proj> → /…/catkin_ws/build/<proj>
+  local ws, proj = cwd:match '(.+/catkin_ws_20)/src/hawk/([^/]+)'
+  if ws and proj then
+    return ws .. '/build/' .. proj
   end
-  -- otherwise assume build is right next to src (or you generated compile_commands.json in-place)
+
+  -- 2) top-level packages
+  --    /…/catkin_ws/src/<proj> → /…/catkin_ws/build/<proj>
+  local ws2, proj2 = cwd:match '(.+/catkin_ws_20)/src/([^/]+)'
+  if ws2 and proj2 then
+    return ws2 .. '/build/' .. proj2
+  end
+
+  -- 3) fallback: assume you generated it next to your sources
   return cwd
 end
 local path_mappings = '/home/nordbo/catkin_ws_20=/home/nordbo_docker/catkin_ws'
@@ -42,28 +51,26 @@ local clangd_cmd = {
 --  • then detect ROS workspace as above
 --  • finally fall back to git ancestor or cwd
 local function clangd_root_dir(fname)
-  -- 1) look for a local compile_commands.json or .git via lspconfig.util
+  -- a) standard cmake/git lookup
   local root = util.root_pattern('compile_commands.json', '.git')(fname)
   if root then
     return root
   end
 
-  -- 2) if we’re in a ROS catkin_ws src/hawk/<proj>, use that as root
+  -- b) any catkin_ws package (hawk-namespace or not) is its own project
   local cwd = vim.fn.getcwd()
-  if cwd:match '.+/catkin_ws/src/hawk/[^/]+' then
+  if cwd:match '(.+/catkin_ws_20)/src/[^/]+' then
     return cwd
   end
 
-  -- 3) fallback: find the nearest .git via vim.fs.find
+  -- c) finally, fall back to Git ancestor or cwd
   local git_dir = vim.fs.find('.git', { path = fname, upward = true })[1]
   if git_dir then
     return vim.fs.dirname(git_dir)
   end
 
-  -- last resort: just use cwd
   return cwd
 end
-
 -- put it all together:
 nvim_lsp.clangd.setup {
   cmd = clangd_cmd,
