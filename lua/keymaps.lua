@@ -42,4 +42,9 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 vim.keymap.set('n', '<C-e>', '1<C-d>:set scroll=0<CR>', { desc = 'Scroll down while cursor stays in-place' })
 vim.keymap.set('n', '<C-y>', '1<C-u>:set scroll=0<CR>', { desc = 'Scroll up while cursor stays in-place' })
 
+vim.keymap.set('n', '<leader>v', function()
+  local new_config = not vim.diagnostic.config().virtual_lines
+  vim.diagnostic.config { virtual_lines = new_config }
+end, { desc = 'Toggle diagnostic [v]irtual_lines' })
+
 -- vim: ts=2 sts=2 sw=2 et
