@@ -59,6 +59,26 @@ return {
         -- See :h blink-cmp-config-keymap for defining your own keymap
         preset = 'default',
 
+        ['<C-k>'] = { 'select_prev', 'fallback' },
+        ['<C-j>'] = { 'select_next', 'fallback' },
+        ['<C-d>'] = {
+          function(cmp)
+            for _ = 1, 4 do
+              cmp.select_next()
+            end
+            return true
+          end,
+          -- 'fallback',
+        },
+        ['<C-u>'] = {
+          function(cmp)
+            for _ = 1, 4 do
+              cmp.select_prev()
+            end
+            return true
+          end,
+          -- 'fallback',
+        },
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
       },
