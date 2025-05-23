@@ -42,6 +42,7 @@ local clangd_cmd = {
   '--path-mappings=' .. path_mappings,
   '--header-insertion-decorators',
   '--header-insertion=iwyu',
+  '--cross-file-rename',
   '-j=8',
   '--log=verbose',
 }
