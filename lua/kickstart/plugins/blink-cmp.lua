@@ -59,26 +59,36 @@ return {
         -- See :h blink-cmp-config-keymap for defining your own keymap
         preset = 'default',
 
-        ['<C-k>'] = { 'select_prev', 'fallback' },
-        ['<C-j>'] = { 'select_next', 'fallback' },
+        ['<C-k>'] = {
+          function(cmp)
+            cmp.select_prev { auto_insert = false }
+          end,
+        },
+        ['<C-j>'] = {
+          function(cmp)
+            cmp.select_next { auto_insert = false }
+          end,
+        },
         ['<C-d>'] = {
           function(cmp)
             for _ = 1, 4 do
-              cmp.select_next()
+              cmp.select_next { auto_insert = false }
             end
             return true
           end,
-          -- 'fallback',
+          'scroll_documentation_down',
         },
         ['<C-u>'] = {
           function(cmp)
             for _ = 1, 4 do
-              cmp.select_prev()
+              cmp.select_prev { auto_insert = false }
             end
             return true
           end,
-          -- 'fallback',
+          'scroll_documentation_up',
         },
+        ['<C-h>'] = { 'snippet_backward', 'fallback' },
+        ['<C-l>'] = { 'snippet_forward', 'fallback' },
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
       },
@@ -111,7 +121,16 @@ return {
       -- the rust implementation via `'prefer_rust_with_warning'`
       --
       -- See :h blink-cmp-config-fuzzy for more information
-      fuzzy = { implementation = 'lua' },
+      -- fuzzy = { implementation = 'lua' },
+      fuzzy = {
+        implementation = 'prefer_rust_with_warning',
+        sorts = {
+          'exact',
+          -- defaults
+          'score',
+          'sort_text',
+        },
+      },
 
       -- Shows a signature help window while you type arguments for a function
       signature = { enabled = true },
